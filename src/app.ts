@@ -1,12 +1,14 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import botPerformanceRoutes from './routes/botPerformanceRoutes';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const dbConnectionString = process.env.DB_CONNECTION_STRING as string;
 

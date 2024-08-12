@@ -1,7 +1,7 @@
 import express from 'express';
-import { User } from '../models/userModel';
+import { User} from '../models/userModel';
 import { Bot } from '../models/botModel';
-import { StakeInfo } from '../models/stakeInfoModel';
+import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
 
 const router = express.Router();
 
@@ -9,17 +9,20 @@ router.post('/api/remove', async (req, res) => {
     const { user_id, bot_id } = req.body;
 
     try {
-        const stakeInfo: StakeInfo = await StakeInfo.findOneAndDelete({ bot_id, user_id });
+        const stakeInfo: iStakeInfo | null = await StakeInfo.findOneAndDelete({
+            bot_id: bot_id,
+            user_id: user_id
+        });
 
         if (stakeInfo) {
-            const user: User = await User.findOne({ user_id });
+            const user = await User.findOne({ user_id: user_id });
             if (user) {
                 user.available_balance += stakeInfo.amount;
                 await user.save();
             }
         }
 
-        const bot: Bot = await Bot.findOne({ bot_id });
+        const bot = await Bot.findOne({ bot_id: bot_id });
         if (bot) {
             bot.subscriber = Math.max(0, bot.subscriber - 1);
             await bot.save();

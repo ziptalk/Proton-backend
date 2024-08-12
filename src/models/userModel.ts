@@ -1,9 +1,15 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-const UserSchema = new Schema({
+export interface iUser extends Document {
+    user_id: string;
+    total_balance: number;
+    available_balance: number;
+}
+
+const UserSchema = new Schema<iUser>({
     user_id: String,
     total_balance: Number,
     available_balance: Number
 });
 
-export const User = mongoose.model('User', UserSchema);
+export const User = mongoose.model<iUser>('User', UserSchema);

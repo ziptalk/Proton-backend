@@ -15,12 +15,14 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "https": "^1.0.0",
-    "mongoose": "^5.13.22",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "mongoose": "^5.13.22"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^22.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   }
 }

@@ -1,27 +1,31 @@
 import express from 'express';
 import { User } from '../models/userModel';
 import { Bot } from '../models/botModel';
-import { balance } from '../models/balanceModel';
-import { StakeInfo } from '../models/stakeInfoModel';
+import { Balance } from '../models/balanceModel';
+import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
 
 const router = express.Router();
+
+interface QueryParams {
+    user_id?: string;
+    token?: string;
+}
 
 // GET /api/dashboard
 router.get('api/dashboard', async (req, res) => {
     try {
-        const userId = req.query.user_id;
-        const token = req.query.token;
+        const { user_id, token }: QueryParams = req.query;
 
-        if (!userId) {
+        if (!user_id) {
             return res.status(400).json({ error: 'User ID is required' });
         }
 
-        const user = await User.findOne({ user_id: userId });
+        const user = await User.findOne({ user_id: user_id });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const stakeInfos: StakeInfo[] = await StakeInfo.find({ user_id: userId }).exec();
+        const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id }).exec();
 
         let totalBalance = 0;
         let totalProfit = 0;
@@ -33,11 +37,11 @@ router.get('api/dashboard', async (req, res) => {
         for (let stakeInfo of stakeInfos) {
             const botId = stakeInfo.bot_id;
 
-            const bot: Bot = await Bot.findOne({ bot_id: botId });
+            const bot = await Bot.findOne({ bot_id: botId });
 
-            const latestBalance: balance = await balance.findOne({ bot_id: botId }).sort({ timestamp: -1 });
+            const latestBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 });
 
-            if (latestBalance) {
+            if (bot && latestBalance) {
                 const currentValue = latestBalance.balance;
                 const totalInvestment = stakeInfo.amount;
                 const totalProfitPerBot = currentValue - totalInvestment;

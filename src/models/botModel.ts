@@ -1,6 +1,14 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-const BotSchema = new Schema({
+export interface iBot extends Document {
+    bot_id: string;
+    name: string;
+    subscriber: number;
+    created_at: Date;
+    chain: string;
+}
+
+const BotSchema = new Schema<iBot>({
     bot_id: String,
     name: String,
     subscriber: Number,
@@ -8,4 +16,4 @@ const BotSchema = new Schema({
     chain: String,
 });
 
-export const Bot = mongoose.model('Bot', BotSchema);
+export const Bot = mongoose.model<iBot>('Bot', BotSchema);

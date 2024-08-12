@@ -1,10 +1,13 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-const transactionSchema = new mongoose.Schema({
-    type: String,
-    details: Object,
-    success: Boolean,
-    timestamp: { type: Date, default: Date.now }
+const TransactionSchema = new Schema({
+    bot_id: String,
+    transaction_id: String,
+    timestamp: Date,
+    from: String,
+    to: String,
+    in: Number,
+    out: Number
 });
 
-export const Transaction = mongoose.model('Transaction', transactionSchema);
+export const Transaction = mongoose.model('BotTransaction', TransactionSchema);

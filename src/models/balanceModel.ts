@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-const balanceSchema = new mongoose.Schema({
-    address: String,
-    balances: Array,
-    timestamp: { type: Date, default: Date.now }
+const balanceSchema = new Schema({
+    bot_id: String,
+    timestamp: Date,
+    balance: Number,
 });
 
-export const Balance = mongoose.model('Balance', balanceSchema);
+export const balance = mongoose.model('balance', balanceSchema);

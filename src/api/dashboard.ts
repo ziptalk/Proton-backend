@@ -12,7 +12,7 @@ interface QueryParams {
 }
 
 // GET /api/dashboard
-router.get('api/dashboard', async (req, res) => {
+router.get('/api/dashboard', async (req, res) => {
     try {
         const { user_id, token }: QueryParams = req.query;
 

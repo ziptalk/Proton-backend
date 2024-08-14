@@ -1,7 +1,7 @@
 import express from 'express';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
-import { User } from '../models/userModel';
-import { Bot } from '../models/botModel';
+import { iUser, User } from '../models/userModel';
+import { Bot, iBot } from '../models/botModel';
 
 const router = express.Router();
 
@@ -9,11 +9,28 @@ router.post('/api/deposit', async (req, res) => {
     const { user_id, bot_id, amount } = req.body;
 
     try {
-        const user = await User.findById(user_id);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (amount < 10) {
+            return res.status(400).json({ success: false, message: 'Amount must be at least 10' });
+        }
 
-        // Increment the user's balance
+        const bot: iBot | null = await Bot.findOne({ bot_id: bot_id }).exec();
+        if (!bot) {
+            return res.status(404).json({ success: false, message: 'Bot not found' });
+        }
+
+        let user = await User.findOne({ user_id: user_id }).exec();
+
+        if (!user) {
+            user = new User({
+                user_id,
+                total_balance: 0,
+                available_balance: 0
+            });
+        }
+
+        // Update user's balance
         user.available_balance += amount;
+        user.total_balance += amount;
         await user.save();
 
         // Create a new transaction
@@ -25,17 +42,16 @@ router.post('/api/deposit', async (req, res) => {
         });
         await newTransaction.save();
 
-        const bot = await Bot.findById(bot_id);
-        if (bot) {
-            bot.subscriber += 1;
-            await bot.save();
-        } else {
-            return res.status(404).json({ success: false, message: 'Bot not found' });
-        }
+        // Update bot's subscriber count
+        bot.subscriber += 1;
+        await bot.save();
 
+        // Respond with the updated balance
         res.json({ success: true, balance: user.available_balance });
-    } catch (error) {
-        res.status(500).send('Server Error');
+    } catch (error: any) {
+        console.error('An error occurred:', error.message);
+        console.error('Stack trace:', error.stack);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 });
 

@@ -28,4 +28,5 @@ app.use(PnlChart);
 app.use(deposit);
 app.use(remove);
 app.use(dashboard);
+
 export default app;

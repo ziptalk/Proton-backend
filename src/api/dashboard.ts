@@ -1,7 +1,7 @@
 import express from 'express';
 import { User } from '../models/userModel';
-import { Bot } from '../models/botModel';
-import { Balance } from '../models/balanceModel';
+import {Bot, iBot} from '../models/botModel';
+import {Balance, iBalance} from '../models/balanceModel';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
 
 const router = express.Router();
@@ -21,6 +21,7 @@ router.get('/api/dashboard', async (req, res) => {
         }
 
         const user = await User.findOne({ user_id: user_id });
+        console.log(user)
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -37,9 +38,9 @@ router.get('/api/dashboard', async (req, res) => {
         for (let stakeInfo of stakeInfos) {
             const botId = stakeInfo.bot_id;
 
-            const bot = await Bot.findOne({ bot_id: botId });
+            const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
 
-            const latestBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 });
+            const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
 
             if (bot && latestBalance) {
                 const currentValue = latestBalance.balance;

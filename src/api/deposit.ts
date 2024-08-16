@@ -28,12 +28,10 @@ router.post('/api/deposit', async (req, res) => {
             });
         }
 
-        // Update user's balance
         user.available_balance += amount;
         user.total_balance += amount;
         await user.save();
 
-        // Create a new transaction
         const newTransaction: iStakeInfo = new StakeInfo({
             user_id,
             bot_id,
@@ -42,11 +40,9 @@ router.post('/api/deposit', async (req, res) => {
         });
         await newTransaction.save();
 
-        // Update bot's subscriber count
         bot.subscriber += 1;
         await bot.save();
 
-        // Respond with the updated balance
         res.json({ success: true, balance: user.available_balance });
     } catch (error: any) {
         console.error('An error occurred:', error.message);

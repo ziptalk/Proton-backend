@@ -21,7 +21,6 @@ router.get('/api/dashboard', async (req, res) => {
         }
 
         const user = await User.findOne({ user_id: user_id });
-        console.log(user)
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -39,9 +38,7 @@ router.get('/api/dashboard', async (req, res) => {
             const botId = stakeInfo.bot_id;
 
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
-
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
-
             if (bot && latestBalance) {
                 const currentValue = latestBalance.balance;
                 const totalInvestment = stakeInfo.amount;
@@ -54,6 +51,7 @@ router.get('/api/dashboard', async (req, res) => {
                 if (!token || (token && bot.chain === token)) {
                     botsData.push({
                         bot_id: bot.bot_id,
+                        bot_name: bot.name,
                         total_investment: totalInvestment,
                         current_value: currentValue,
                         daily_pnl: dailyPnl,

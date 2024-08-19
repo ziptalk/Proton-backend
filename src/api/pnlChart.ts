@@ -1,7 +1,6 @@
 import express from 'express';
 import { Balance, iBalance } from '../models/balanceModel';
 import { User } from '../models/userModel';
-import { StakeInfo } from "../models/stakeInfoModel";
 import { Bot } from "../models/botModel";
 
 const router = express.Router();
@@ -15,7 +14,6 @@ interface QueryParams {
 interface BotDetailInformation {
     apy: number;
     winRate: number;
-    tvl: number;
     mdd: number;
 }
 
@@ -42,7 +40,6 @@ router.get('/api/PnLChart', async (req, res) => {
         const botDetailInformation: BotDetailInformation = {
             apy: 15.5,
             winRate: await calculateWinRate(bot.bot_id),
-            tvl: await calculateTVL(bot.bot_id),
             mdd: await calculateMDD(bot.bot_id),
         };
         const response = {
@@ -93,25 +90,6 @@ const calculateWinRate = async (botId: string): Promise<number> => {
 
     const winRate: number = totalDaysCount > 0 ? winningDaysCount / totalDaysCount : 0;
     return winRate * 100;
-}
-
-export const calculateTVL = async (botId?: string): Promise<number> => {
-    /*
-    TVL(Total Value Locked)
-    => StakeInfo의 amount의 합
-     */
-    let totalValueLocked = await StakeInfo.aggregate([
-        {
-            $match: { bot_id: botId }
-        },
-        {
-            $group: {
-                _id: null,
-                total_value_locked: { $sum: "$amount" }
-            }
-        }
-    ]);
-    return totalValueLocked[0]?.total_value_locked || 0;
 }
 
 const calculateMDD = async (botId: string): Promise<number> => {

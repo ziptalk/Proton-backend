@@ -11,11 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/proto-signing": "^0.28.4",
+    "@cosmjs/stargate": "^0.28.13",
+    "@duality-labs/neutronjs": "^4.0.0-rc3-fix-2",
+    "chain-registry": "^1.63.40",
     "cors": "^2.8.5",
+    "cosmjs-utils": "^0.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "https": "^1.0.0",
-    "mongoose": "^5.13.22"
+    "mongoose": "^5.13.22",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

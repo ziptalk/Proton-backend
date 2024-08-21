@@ -27,36 +27,25 @@ router.get('/api/dashboard', async (req, res) => {
 
         const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id }).exec();
 
-        const botIds = stakeInfos.map(info => info.bot_id);
-
-        const bots = await Bot.find({ bot_id: { $in: botIds } }).exec();
-
-        const balances = await Balance.aggregate([
-            { $match: { bot_id: { $in: botIds } } },
-            { $sort: { timestamp: -1 } },
-            { $group: { _id: "$bot_id", balance: { $first: "$balance" } } }
-        ]).exec();
-
-        const botMap = new Map<string, iBot>();
-        const balanceMap = new Map<string, number>();
-
-        bots.forEach(bot => botMap.set(bot.bot_id, bot));
-        balances.forEach(balance => balanceMap.set(balance._id, balance.balance));
-
         let totalBalance = 0;
         let totalProfit = 0;
-        let totalBalanceUSDT = 0;
-        let totalProfitUSDT = 0;
+        let totalBalanceUSDT = 0; // USDT 값은 나중에 환율 API를 통해 추가적으로 계산
+        let totalProfitUSDT = 0; // 마찬가지로 나중에 계산
 
         const botsData = [];
+        const processedBotIds = new Set<string>();
 
         for (let stakeInfo of stakeInfos) {
             const botId = stakeInfo.bot_id;
 
-            const bot = botMap.get(botId);
-            const currentValue = balanceMap.get(botId) || 0;
+            if (processedBotIds.has(botId)) {
+                continue;
+            }
 
-            if (bot) {
+            const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
+            const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+            if (bot && latestBalance) {
+                const currentValue = latestBalance.balance;
                 const totalInvestment = stakeInfo.amount;
                 const totalProfitPerBot = currentValue - totalInvestment;
                 const dailyPnl = 0;
@@ -73,6 +62,7 @@ router.get('/api/dashboard', async (req, res) => {
                         total_profit: totalProfitPerBot
                     });
                 }
+                processedBotIds.add(botId);
             }
         }
 

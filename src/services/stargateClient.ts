@@ -21,9 +21,8 @@ export async function sendTokens(senderAddress: string, recipientAddress: string
         );
         const adjustedAmount = amountToSend * 10 ** 6;
 
-        const amount = coins(adjustedAmount.toString(), "untrn"); // 보내는 양과 denom
+        const amount = coins(adjustedAmount.toString(), "untrn");
 
-        // 트랜잭션을 보냅니다.
         const fee = {
             amount: coins(887, "untrn"), // 수수료
             gas: "139400", // 가스 비용
@@ -37,7 +36,6 @@ export async function sendTokens(senderAddress: string, recipientAddress: string
     } catch (error) {
         console.error("Failed to send transaction:", error);
     } finally {
-        // 클라이언트가 정의되어 있는지 확인하고 닫습니다.
         if (client) {
             client.disconnect();
         }

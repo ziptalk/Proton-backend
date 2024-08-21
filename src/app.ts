@@ -8,6 +8,7 @@ import PnlChart from "./api/pnlChart";
 import deposit from "./api/deposit";
 import dashboard from "./api/dashboard";
 import remove from "./api/remove";
+
 dotenv.config();
 
 const app = express();
@@ -16,11 +17,16 @@ app.use(cors());
 
 const dbConnectionString = process.env.DB_CONNECTION_STRING as string;
 
-mongoose.connect(dbConnectionString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => console.log('Database connected'))
-    .catch((error) => console.error('Database connection error:', error));
+mongoose.disconnect().then(() => {
+    console.log('Existing database connection closed');
+
+    // 새로운 연결을 설정합니다.
+    mongoose.connect(dbConnectionString, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    }).then(() => console.log('Database connected'))
+        .catch((error) => console.error('Database connection error:', error));
+}).catch((error) => console.error('Error disconnecting existing connection:', error));
 
 app.use(onboarding);
 app.use(tradeBots);

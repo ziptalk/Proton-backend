@@ -26,19 +26,19 @@ router.get('/api/trade-bots', async (req, res) => {
             bots.map(async (bot) => {
                 const pnlData: iBalance[] = await Balance.find({ bot_id: bot.bot_id }).sort({ timestamp: -1 }).exec();
 
-                const totalProfits = pnlData.reduce((acc, record) => acc + record.balance, 0);
-                const tvl = pnlData.length > 0 ? pnlData[0].balance : 0;
-                console.log(tvl)
-                const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
+                const recentData = pnlData[0];
+                const oldestData = pnlData[pnlData.length - 1];
+
+                const totalProfits = parseFloat((recentData.balance / oldestData.balance - 1).toFixed(2));                const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
 
                 return {
                     bot_id: bot.bot_id,
                     name: bot.name,
                     subscriber: bot.subscriber,
-                    total_profits: totalProfits,
+                    total_profits: totalProfits * 100,
                     apy: APY,
                     runtime: runtime,
-                    tvl: tvl,
+                    tvl: bot.investAmount,
                     chain: bot.chain,
                 };
             })

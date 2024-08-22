@@ -3,6 +3,7 @@ import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { Balance, iBalance } from '../models/balanceModel';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
+import {calculateDailyPnl} from "./pnlChart";
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.get('/api/dashboard', async (req, res) => {
 
                 const currentValue = latestBalance.balance;
                 const totalProfitPerBot = currentValue - totalInvestment;
-                const dailyPnl = 0;
+                const dailyPnl = await calculateDailyPnl(botId);
 
                 totalBalance += currentValue;
                 totalProfit += totalProfitPerBot;

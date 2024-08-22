@@ -45,13 +45,15 @@ router.post('/api/deposit', async (req, res) => {
         bot.subscriber += 1;
         await bot.save();
 
-        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ createdAt: -1 }).exec();
+        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
         if (!balance) {
             return res.status(404).json({ success: false, message: 'Balance not found' });
         }
+        console
         balance.investmentAmount += amount
         balance.balance += amount
         await balance.save();
+
         res.json({ success: true, balance: user.available_balance });
     } catch (error: any) {
         console.error('An error occurred:', error.message);

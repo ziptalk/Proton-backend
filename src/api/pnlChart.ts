@@ -117,7 +117,7 @@ const calculateMDD = async (botId: string): Promise<number> => {
     return mdd * 100;
 }
 
-const calculateDailyPnl = async (botId: string): Promise<number> => {
+export const calculateDailyPnl = async (botId: string): Promise<number> => {
     /*
     Bot Daily PnL
     - 가장 최근 날짜: x라고 가정

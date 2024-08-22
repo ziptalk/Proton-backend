@@ -11,6 +11,7 @@ interface QueryParams {
     user_id?: string;
     token?: string;
 }
+const NTRNUSDT = 0.39
 
 // GET /api/dashboard
 router.get('/api/dashboard', async (req, res) => {
@@ -28,13 +29,10 @@ router.get('/api/dashboard', async (req, res) => {
 
         const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id }).exec();
 
-        // Create a map to store bot data by bot_id
         const botDataMap = new Map<string, any>();
-        const NTRNUSDT = 0.39
         let totalBalance = 0;
         let totalProfit = 0;
 
-        // Collect unique bot_ids
         const uniqueBotIds = new Set(stakeInfos.map(stakeInfo => stakeInfo.bot_id));
 
         for (let botId of uniqueBotIds) {
@@ -42,26 +40,18 @@ router.get('/api/dashboard', async (req, res) => {
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
 
             if (bot && latestBalance) {
-                let totalInvestment = 0;
-                stakeInfos
-                    .filter(stakeInfo => stakeInfo.bot_id === botId)
-                    .forEach(stakeInfo => {
-                        totalInvestment += stakeInfo.amount;
-                    });
-
-                const currentValue = latestBalance.balance;
-                const totalProfitPerBot = currentValue - totalInvestment;
+                const totalProfitPerBot = latestBalance.balance - bot.investAmount;
                 const dailyPnl = await calculateDailyPnl(botId);
 
-                totalBalance += currentValue;
+                totalBalance += latestBalance.balance;
                 totalProfit += totalProfitPerBot;
 
                 if (!token || (token && bot.chain === token)) {
                     botDataMap.set(botId, {
                         bot_id: bot.bot_id,
                         bot_name: bot.name,
-                        total_investment: totalInvestment,
-                        current_value: currentValue,
+                        total_investment: bot.investAmount,
+                        current_value: latestBalance.balance,
                         daily_pnl: dailyPnl,
                         total_profit: totalProfitPerBot
                     });

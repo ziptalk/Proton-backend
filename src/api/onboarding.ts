@@ -1,19 +1,20 @@
 import express from 'express';
-import { StakeInfo } from '../models/stakeInfoModel';
+import { Bot } from '../models/botModel';
 
 const router = express.Router();
 
 router.get('/api/onboarding', async (req, res) => {
     try {
-        const totalValueLocked = await StakeInfo.aggregate([
+        const totalInvestAmount = await Bot.aggregate([
             {
                 $group: {
                     _id: null,
-                    total_value_locked: { $sum: "$amount" }
+                    total_invest_amount: { $sum: "$investAmount" }
                 }
             }
         ]);
-        res.json({ total_value_locked: totalValueLocked[0]?.total_value_locked || 0 });
+
+        res.json({ total_invest_amount: totalInvestAmount[0]?.total_invest_amount || 0 });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error');

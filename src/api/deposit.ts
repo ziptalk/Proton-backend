@@ -19,42 +19,36 @@ router.post('/api/deposit', async (req, res) => {
         if (!bot) {
             return res.status(404).json({ success: false, message: 'Bot not found' });
         }
+        bot.subscriber += 1;
+        bot.investAmount += amount;
+        await bot.save();
 
         let user = await User.findOne({ user_id: user_id }).exec();
-
         if (!user) {
             user = new User({
                 user_id,
-                total_balance: 0,
-                available_balance: 0
+                stakeAmount: 0,
             });
         }
-
-        user.available_balance += amount;
-        user.total_balance += amount;
+        user.stakeAmount += amount;
         await user.save();
 
-        const newTransaction: iStakeInfo = new StakeInfo({
+        const newStakeInfo: iStakeInfo = new StakeInfo({
             user_id,
             bot_id,
             timestamp: new Date(),
             amount,
         });
-        await newTransaction.save();
-
-        bot.subscriber += 1;
-        await bot.save();
+        await newStakeInfo.save();
 
         const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
         if (!balance) {
             return res.status(404).json({ success: false, message: 'Balance not found' });
         }
-        console
-        balance.investmentAmount += amount
-        balance.balance += amount
+        balance.balance += amount;
         await balance.save();
 
-        res.json({ success: true, balance: user.available_balance });
+        res.json({ success: true, balance: user.stakeAmount });
     } catch (error: any) {
         console.error('An error occurred:', error.message);
         console.error('Stack trace:', error.stack);

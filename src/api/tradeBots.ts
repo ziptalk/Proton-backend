@@ -28,6 +28,7 @@ router.get('/api/trade-bots', async (req, res) => {
 
                 const totalProfits = pnlData.reduce((acc, record) => acc + record.balance, 0);
                 const tvl = pnlData.length > 0 ? pnlData[0].balance : 0;
+                console.log(tvl)
                 const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
 
                 return {

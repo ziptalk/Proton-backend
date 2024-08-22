@@ -1,7 +1,7 @@
 import express from 'express';
 import { Balance, iBalance } from '../models/balanceModel';
-import { User } from '../models/userModel';
-import { Bot } from "../models/botModel";
+import { User, iUser } from '../models/userModel';
+import { Bot, iBot } from "../models/botModel";
 
 const router = express.Router();
 
@@ -25,28 +25,29 @@ router.get('/api/PnLChart', async (req, res) => {
     }
 
     try {
-        const query: any = { bot_id };
-        const bot = await Bot.findOne({ bot_id: bot_id }).exec();
+        const bot: iBot | null = await Bot.findOne({ bot_id }).exec();
         if (!bot) {
             return res.status(404).json({ error: 'Bot not found' });
         }
 
-        const balanceData: iBalance[] = await Balance.find(query).sort({ timestamp: -1 }).limit(parseInt(timeframe as string, 10)).exec();
+        const balanceData: iBalance[] = await Balance.find({ bot_id })
+            .sort({ timestamp: -1 })
+            .limit(parseInt(timeframe as string, 10))
+            .exec();
         balanceData.reverse();
 
-        const user = await User.findOne({ user_id: user_id }).exec();
-        const availableBalance = user ? user.available_balance : 0;
+        const user: iUser | null = await User.findOne({ user_id }).exec();
 
         const botDetailInformation: BotDetailInformation = {
             apy: 15.5,
-            winRate: await calculateWinRate(bot.bot_id),
-            mdd: await calculateMDD(bot.bot_id),
+            winRate: 70,
+            mdd: 11
         };
+
         const response = {
             bot_id: bot.bot_id,
             bot_name: bot.name,
             timeframe: parseInt(timeframe as string, 10),
-            Available: availableBalance,
             daily_PnL: await calculateDailyPnl(bot.bot_id),
             data: balanceData.map(entry => ({
                 createdAt: entry.timestamp,
@@ -72,7 +73,7 @@ const calculateWinRate = async (botId: string): Promise<number> => {
     const totalBalances: iBalance[] = await Balance.find({ bot_id: botId })
         .sort({ timestamp: 1 })
         .exec();
-    
+
     const totalDaysCount: number = totalBalances.length;
     let winningDaysCount: number = 0;
 
@@ -80,8 +81,8 @@ const calculateWinRate = async (botId: string): Promise<number> => {
         const current: iBalance = totalBalances[day];
         const previous: iBalance = totalBalances[day - 1];
 
-        const currentPnlRate: number = current.balance / current.investmentAmount;
-        const previousPnlRate: number = previous.balance / previous.investmentAmount;
+        const currentPnlRate: number = current.balance;
+        const previousPnlRate: number = previous.balance;
 
         if (currentPnlRate > previousPnlRate) {
             winningDaysCount++;
@@ -101,19 +102,18 @@ const calculateMDD = async (botId: string): Promise<number> => {
      */
     const totalBalances: iBalance[] = await Balance.find({ bot_id: botId }).exec();
 
-    let maxPnlRate: number = Number.MIN_VALUE;
-    let minPnlRate: number = Number.MAX_VALUE;
+    let maxBalance: number = Number.MIN_VALUE;
+    let minBalance: number = Number.MAX_VALUE;
     for (const balance of totalBalances) {
-        const pnlRate = balance.balance / balance.investmentAmount;
-        if (pnlRate > maxPnlRate) {
-            maxPnlRate = pnlRate;
+        if (balance.balance > maxBalance) {
+            maxBalance = balance.balance;
         }
-        if (pnlRate < minPnlRate) {
-            minPnlRate = pnlRate;
+        if (balance.balance < minBalance) {
+            minBalance = balance.balance;
         }
     }
 
-    const mdd = 1 - (minPnlRate / maxPnlRate);
+    const mdd = 1 - (minBalance / maxBalance);
     return mdd * 100;
 }
 
@@ -130,8 +130,8 @@ export const calculateDailyPnl = async (botId: string): Promise<number> => {
         return 0;
     }
 
-    const todayPnlRate = todayBalance.balance / todayBalance.investmentAmount;
-    const yesterdayPnlRate = yesterdayBalance.balance / yesterdayBalance.investmentAmount;
+    const todayPnlRate = todayBalance.balance;
+    const yesterdayPnlRate = yesterdayBalance.balance;
 
     const dailyPnlRate = (todayPnlRate / yesterdayPnlRate) - 1;
     return dailyPnlRate * 100;

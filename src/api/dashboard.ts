@@ -39,7 +39,7 @@ router.get('/api/dashboard', async (req, res) => {
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
             const stakeAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
 
-            if (bot && latestBalance) {
+            if (bot && latestBalance && stakeAmount) {
                 const totalProfitPerBot = (latestBalance.balance - bot.investAmount) / stakeAmount;
                 const dailyPnl = await calculateDailyPnl(botId);
 
@@ -68,7 +68,7 @@ router.get('/api/dashboard', async (req, res) => {
             total_profit_usdt: totalProfit * NTRNUSDT,
             bots: botsData
         };
-
+        console.log(dashboardData)
         res.json(dashboardData);
 
     } catch (error) {

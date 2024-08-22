@@ -44,11 +44,13 @@ router.get('/api/PnLChart', async (req, res) => {
             mdd: 11
         };
 
+        const dailyPNL = await calculateDailyPnl(bot.bot_id)
+
         const response = {
             bot_id: bot.bot_id,
             bot_name: bot.name,
             timeframe: parseInt(timeframe as string, 10),
-            daily_PnL: await calculateDailyPnl(bot.bot_id),
+            daily_PnL: dailyPNL[0],
             data: balanceData.map(entry => ({
                 createdAt: entry.timestamp,
                 pnlRate: entry.balance
@@ -117,7 +119,7 @@ const calculateMDD = async (botId: string): Promise<number> => {
     return mdd * 100;
 }
 
-export const calculateDailyPnl = async (botId: string): Promise<number> => {
+export const calculateDailyPnl = async (botId: string): Promise<[number, number]> => {
     /*
     Bot Daily PnL
     - 가장 최근 날짜: x라고 가정
@@ -127,14 +129,14 @@ export const calculateDailyPnl = async (botId: string): Promise<number> => {
     const yesterdayBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).skip(1).exec();
 
     if (!todayBalance || !yesterdayBalance) {
-        return 0;
+        return [0,0];
     }
 
     const todayPnlRate = todayBalance.balance;
     const yesterdayPnlRate = yesterdayBalance.balance;
 
     const dailyPnlRate = (todayPnlRate / yesterdayPnlRate) - 1;
-    return dailyPnlRate * 100;
+    return [dailyPnlRate * 100, todayPnlRate - yesterdayPnlRate];
 }
 
 export default router;

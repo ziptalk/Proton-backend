@@ -26,33 +26,33 @@ router.get('/api/dashboard', async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-
-        const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id }).exec();
+        const bots: iBot[] = await Bot.find({}).exec();
+        const botIds = bots.map(bot => bot.bot_id);
 
         const botDataMap = new Map<string, any>();
         let totalBalance = 0;
         let totalProfit = 0;
 
-        const uniqueBotIds = new Set(stakeInfos.map(stakeInfo => stakeInfo.bot_id));
-
-        for (let botId of uniqueBotIds) {
+        for (let botId of botIds) {
+            const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id, bot_id: botId }).exec();
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+            const stakeAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
 
             if (bot && latestBalance) {
-                const totalProfitPerBot = latestBalance.balance - bot.investAmount;
+                const totalProfitPerBot = latestBalance.balance / stakeAmount - stakeAmount;
                 const dailyPnl = await calculateDailyPnl(botId);
 
-                totalBalance += latestBalance.balance;
-                totalProfit += totalProfitPerBot;
+                totalProfit += totalProfitPerBot
+                totalBalance += stakeAmount
 
                 if (!token || (token && bot.chain === token)) {
                     botDataMap.set(botId, {
                         bot_id: bot.bot_id,
                         bot_name: bot.name,
-                        total_investment: bot.investAmount,
-                        current_value: latestBalance.balance,
-                        daily_pnl: dailyPnl,
+                        total_investment: stakeAmount,
+                        current_value: latestBalance.balance / stakeAmount,
+                        daily_pnl: dailyPnl[1] / stakeAmount,
                         total_profit: totalProfitPerBot
                     });
                 }

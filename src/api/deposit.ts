@@ -2,7 +2,6 @@ import express from 'express';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
 import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
-import {sendTokens} from "../services/stargateClient";
 import {Balance, iBalance} from "../models/balanceModel";
 
 const router = express.Router();

@@ -13,8 +13,8 @@ router.get('/api/onboarding', async (req, res) => {
                 }
             }
         ]);
-
-        res.json({ total_invest_amount: totalInvestAmount[0]?.total_invest_amount || 0 });
+        console.log(totalInvestAmount[0]?.total_invest_amount)
+        res.json({ total_value_locked: totalInvestAmount[0]?.total_invest_amount || 0 });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error');

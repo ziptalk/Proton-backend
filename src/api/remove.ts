@@ -40,7 +40,7 @@ router.post('/api/remove', async (req, res) => {
         user.stakeAmount = Math.max(0, user.stakeAmount - totalAmount);
         await user.save();
 
-        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).exec();
+        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({timestamp : -1}).exec();
         if (!balance) {
             return res.status(404).json({ success: false, message: 'Balance not found' });
         }

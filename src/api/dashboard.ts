@@ -27,33 +27,36 @@ router.get('/api/dashboard', async (req, res) => {
 
         const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id }).exec();
 
+        // Create a map to store bot data by bot_id
+        const botDataMap = new Map<string, any>();
+        const NTRNUSDT = 0.39
         let totalBalance = 0;
         let totalProfit = 0;
-        let totalBalanceUSDT = 0; // USDT 값은 나중에 환율 API를 통해 추가적으로 계산
-        let totalProfitUSDT = 0; // 마찬가지로 나중에 계산
 
-        const botsData = [];
-        const processedBotIds = new Set<string>();
+        // Collect unique bot_ids
+        const uniqueBotIds = new Set(stakeInfos.map(stakeInfo => stakeInfo.bot_id));
 
-        for (let stakeInfo of stakeInfos) {
-            const botId = stakeInfo.bot_id;
-
-            if (processedBotIds.has(botId)) {
-                continue;
-            }
-
+        for (let botId of uniqueBotIds) {
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+
             if (bot && latestBalance) {
+                let totalInvestment = 0;
+                stakeInfos
+                    .filter(stakeInfo => stakeInfo.bot_id === botId)
+                    .forEach(stakeInfo => {
+                        totalInvestment += stakeInfo.amount;
+                    });
+
                 const currentValue = latestBalance.balance;
-                const totalInvestment = stakeInfo.amount;
                 const totalProfitPerBot = currentValue - totalInvestment;
                 const dailyPnl = 0;
+
                 totalBalance += currentValue;
                 totalProfit += totalProfitPerBot;
 
                 if (!token || (token && bot.chain === token)) {
-                    botsData.push({
+                    botDataMap.set(botId, {
                         bot_id: bot.bot_id,
                         bot_name: bot.name,
                         total_investment: totalInvestment,
@@ -62,15 +65,16 @@ router.get('/api/dashboard', async (req, res) => {
                         total_profit: totalProfitPerBot
                     });
                 }
-                processedBotIds.add(botId);
             }
         }
+
+        const botsData = Array.from(botDataMap.values());
 
         const dashboardData = {
             total_balance: totalBalance,
             total_profit: totalProfit,
-            total_balance_usdt: totalBalanceUSDT,
-            total_profit_usdt: totalProfitUSDT,
+            total_balance_usdt: totalBalance * NTRNUSDT,
+            total_profit_usdt: totalProfit * NTRNUSDT,
             bots: botsData
         };
 

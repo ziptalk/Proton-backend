@@ -27,7 +27,7 @@ router.post('/api/remove', async (req, res) => {
         const lastStakeInfoDate = new Date(stakeInfos[0].timestamp);
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
         if (lastStakeInfoDate > threeDaysAgo) {
-            return res.status(403).json({ success: false, message: 'Withdrawal not allowed. Last stake was less than 3 days ago.' });
+            return res.status(400).json({ success: false, message: 'Withdrawal not allowed. Last stake was less than 3 days ago.' });
         }
         const totalAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
 

@@ -19,10 +19,16 @@ router.post('/api/remove', async (req, res) => {
         const stakeInfos: iStakeInfo[] = await StakeInfo.find({
             bot_id: bot_id,
             user_id: user_id
-        }).exec();
+        }).sort({ timestamp: -1 }).exec();
 
         if (stakeInfos.length === 0) {
             return res.status(404).json({ success: false, message: 'No stakes found for this user and bot' });
+        }
+
+        const lastStakeInfoDate = new Date(stakeInfos[0].timestamp);
+        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+        if (lastStakeInfoDate > threeDaysAgo) {
+            return res.status(407).json({ success: false, message: 'Withdrawal not allowed. Last stake was less than 3 days ago.' });
         }
 
         const totalAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
@@ -40,7 +46,7 @@ router.post('/api/remove', async (req, res) => {
         user.stakeAmount = Math.max(0, user.stakeAmount - totalAmount);
         await user.save();
 
-        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({timestamp : -1}).exec();
+        const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
         if (!balance) {
             return res.status(404).json({ success: false, message: 'Balance not found' });
         }

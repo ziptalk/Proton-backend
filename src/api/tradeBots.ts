@@ -14,7 +14,6 @@ interface QueryParams {
     search?: string;
 }
 
-
 router.get('/api/trade-bots', async (req, res) => {
     const { sort = 'total_profits', order = 'desc', search = '' }: QueryParams = req.query;
     const sortOrder = order === 'asc' ? 1 : -1;
@@ -29,7 +28,8 @@ router.get('/api/trade-bots', async (req, res) => {
                 const recentData = pnlData[0];
                 const oldestData = pnlData[pnlData.length - 1];
 
-                const totalProfits = parseFloat((recentData.balance / oldestData.balance - 1).toFixed(2));                const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
+                const totalProfits = parseFloat((recentData.balance / oldestData.balance - 1).toFixed(2));
+                const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
 
                 return {
                     bot_id: bot.bot_id,

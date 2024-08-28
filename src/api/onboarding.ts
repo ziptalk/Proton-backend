@@ -1,20 +1,12 @@
 import express from 'express';
-import { Bot } from '../models/botModel';
+import { getTotalInvestAmount } from "../services/botService";
 
 const router = express.Router();
 
 router.get('/api/onboarding', async (req, res) => {
     try {
-        const totalInvestAmount = await Bot.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    total_invest_amount: { $sum: "$investAmount" }
-                }
-            }
-        ]);
-        console.log(totalInvestAmount[0]?.total_invest_amount)
-        res.json({ total_value_locked: totalInvestAmount[0]?.total_invest_amount || 0 });
+        const totalInvestAmount = await getTotalInvestAmount();
+        res.json({ total_value_locked: totalInvestAmount });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server Error');

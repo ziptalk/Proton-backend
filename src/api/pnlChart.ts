@@ -64,24 +64,4 @@ router.get('/api/PnLChart', async (req, res) => {
     }
 });
 
-export const calculateDailyPnl = async (botId: string): Promise<[number, number]> => {
-    /*
-    Bot Daily PnL
-    - 가장 최근 날짜: x라고 가정
-    => (x의 잔고 / x의 총 투자금) / (x - 1의 잔고 / x - 1의 총 투자금) - 1
-    */
-    const todayBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
-    const yesterdayBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).skip(1).exec();
-
-    if (!todayBalance || !yesterdayBalance) {
-        return [0,0];
-    }
-
-    const todayPnlRate = todayBalance.balance;
-    const yesterdayPnlRate = yesterdayBalance.balance;
-
-    const dailyPnlRate = (todayPnlRate / yesterdayPnlRate) - 1;
-    return [dailyPnlRate * 100, todayPnlRate - yesterdayPnlRate];
-}
-
 export default router;

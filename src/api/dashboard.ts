@@ -2,8 +2,7 @@ import express from 'express';
 import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { Balance, iBalance } from '../models/balanceModel';
-import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
-import {calculateDailyPnl} from "./pnlChart";
+import {getDailyProfit, getTotalStakedAmount} from "../services/botService";
 
 const router = express.Router();
 
@@ -34,25 +33,24 @@ router.get('/api/dashboard', async (req, res) => {
         let totalProfit = 0;
 
         for (let botId of botIds) {
-            const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id, bot_id: botId }).exec();
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
             const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
-            const stakeAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
+            const totalStakedAmount = await getTotalStakedAmount(user_id, botId);
 
-            if (bot && latestBalance && stakeAmount) {
-                const totalProfitPerBot = (latestBalance.balance - bot.investAmount) / stakeAmount;
-                const dailyPnl = await calculateDailyPnl(botId);
+            if (bot && latestBalance && totalStakedAmount) {
+                const totalProfitPerBot = (latestBalance.balance - bot.investAmount) / totalStakedAmount;
+                const dailyProfit: number = await getDailyProfit(botId);
 
                 totalProfit += totalProfitPerBot
-                totalBalance += stakeAmount
+                totalBalance += totalStakedAmount
 
                 if (!token || (token && bot.chain === token)) {
                     botDataMap.set(botId, {
                         bot_id: bot.bot_id,
                         bot_name: bot.name,
-                        total_investment: stakeAmount,
-                        current_value: stakeAmount + totalProfitPerBot,
-                        daily_pnl: dailyPnl[1] / stakeAmount,
+                        total_investment: totalStakedAmount,
+                        current_value: totalStakedAmount + totalProfitPerBot,
+                        daily_pnl: dailyProfit / totalStakedAmount,
                         total_profit: totalProfitPerBot
                     });
                 }

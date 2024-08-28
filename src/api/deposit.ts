@@ -22,15 +22,11 @@ router.post('/api/deposit', async (req, res) => {
         bot.investAmount += amount;
         await bot.save();
 
-        let user = await User.findOne({ user_id: user_id }).exec();
-        if (!user) {
-            user = new User({
-                user_id,
-                stakeAmount: 0,
-            });
-        }
-        user.stakeAmount += amount;
-        await user.save();
+        const user = await User.findOneAndUpdate(
+            { user_id: user_id },
+            { $inc: { stakeAmount: amount } },
+            { new: true, upsert: true }
+        );
 
         const newStakeInfo: iStakeInfo = new StakeInfo({
             user_id,

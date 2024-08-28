@@ -1,5 +1,5 @@
 import express from 'express';
-import { iUser, User } from '../models/userModel';
+import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
 import { sendTokens } from "../services/stargateClient";

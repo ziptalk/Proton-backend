@@ -1,0 +1,44 @@
+openapi: '3.0.0'
+info:
+  version: 1.0.0
+  title: Proton API docs
+  description: Proton의 API 문서입니다
+servers:
+  - description: "Project Production Server"
+    url: https://nextondb.com
+  - description: "Project Local Server"
+    url: http://localhost:3000/
+paths:
+
+components:
+  responses:
+    BadRequest:
+      description: Invalid request or missing fields
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Invalid request or Missing fields"
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Error saving stakeInfo"
+    NotFoundError:
+      description: When Cannot found required File
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Not found Stake Info"

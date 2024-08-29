@@ -5,6 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
+    "prebuild": "npm run api-docs",
     "start": "tsc && node dist/server.js",
     "postbuild": "cp ./src/swagger.yaml ./dist/swagger.yaml",
     "api-docs": "swagger-cli bundle ./src/swagger/openapi.yaml --outfile src/swagger.yaml --type yaml",

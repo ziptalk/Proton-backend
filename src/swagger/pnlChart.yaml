@@ -75,19 +75,6 @@
                   type: string
                   example: 'bot_id, user_id, and timeframe are required'
       '404':
-        description: Bot not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  example: 'Bot not found'
+        $ref: "./openapi.yaml#/components/responses/NotFoundError"
       '500':
-        description: Internal server error
-        content:
-          text/plain:
-            schema:
-              type: string
-              example: 'Server Error'
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

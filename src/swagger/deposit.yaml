@@ -62,18 +62,4 @@
                   type: string
                   description: Error message
       '500':
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: false
-                message:
-                  type: string
-                  description: Error message
-                error:
-                  type: string
-                  description: Detailed error message
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

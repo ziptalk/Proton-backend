@@ -59,12 +59,4 @@
                     type: string
                     description: Blockchain associated with the bot
       '500':
-        description: Internal server error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: 'Server Error'
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

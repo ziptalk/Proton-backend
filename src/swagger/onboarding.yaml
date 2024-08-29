@@ -3,7 +3,7 @@
     summary: Get Total Invest Amount
     responses:
       '200':
-        description: 성공적으로 총 투자 금액을 조회
+        description: Successfully get total invest amount
         content:
           application/json:
             schema:
@@ -11,11 +11,6 @@
               properties:
                 total_value_locked:
                   type: number
-                  description: 총 투자 금액
+                  description: total Invest Amount
       '500':
-        description: 내부 서버 오류
-        content:
-          text/plain:
-            schema:
-              type: string
-              example: 'Server Error'
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

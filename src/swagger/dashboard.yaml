@@ -58,32 +58,8 @@
                         type: number
                         description: Total profit from the bot
       '400':
-        description: Bad Request (e.g., missing user_id)
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message
+        $ref: "./openapi.yaml#/components/responses/BadRequest"
       '404':
-        description: User not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message
+        $ref: "./openapi.yaml#/components/responses/NotFoundError"
       '500':
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

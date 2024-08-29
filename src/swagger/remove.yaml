@@ -45,18 +45,4 @@
                   type: string
                   example: 'User not found'
       '500':
-        description: Internal server error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: false
-                message:
-                  type: string
-                  example: 'Server Error'
-                error:
-                  type: string
-                  description: Detailed error message
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

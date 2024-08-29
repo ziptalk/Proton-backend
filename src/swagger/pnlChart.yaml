@@ -1,0 +1,93 @@
+/api/PnLChart:
+  get:
+    summary: API to retrieve the profit and loss chart for a specific bot.
+    parameters:
+      - name: bot_id
+        in: query
+        required: true
+        schema:
+          type: string
+        description: The ID of the bot
+      - name: user_id
+        in: query
+        required: true
+        schema:
+          type: string
+        description: The ID of the user
+      - name: timeframe
+        in: query
+        required: true
+        schema:
+          type: string
+        description: The timeframe to retrieve (e.g., number of days)
+    responses:
+      '200':
+        description: Successfully retrieved profit and loss chart data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bot_id:
+                  type: string
+                  description: The ID of the bot
+                bot_name:
+                  type: string
+                  description: The name of the bot
+                timeframe:
+                  type: integer
+                  description: The timeframe retrieved
+                daily_PnL:
+                  type: number
+                  description: Daily profit and loss rate
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Timestamp of the data entry
+                      pnlRate:
+                        type: number
+                        description: Profit and loss rate
+                detailInformation:
+                  type: object
+                  properties:
+                    apy:
+                      type: number
+                      description: Annual percentage yield
+                    winRate:
+                      type: number
+                      description: Win rate
+                    mdd:
+                      type: number
+                      description: Maximum drawdown
+      '400':
+        description: Bad request (missing required parameters)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: 'bot_id, user_id, and timeframe are required'
+      '404':
+        description: Bot not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: 'Bot not found'
+      '500':
+        description: Internal server error
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: 'Server Error'

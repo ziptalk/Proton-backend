@@ -1,0 +1,21 @@
+/api/onboarding:
+  get:
+    summary: Get Total Invest Amount
+    responses:
+      '200':
+        description: 성공적으로 총 투자 금액을 조회
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total_value_locked:
+                  type: number
+                  description: 총 투자 금액
+      '500':
+        description: 내부 서버 오류
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: 'Server Error'

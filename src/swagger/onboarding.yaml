@@ -1,0 +1,16 @@
+/api/onboarding:
+  get:
+    summary: Get Total Invest Amount
+    responses:
+      '200':
+        description: Successfully get total invest amount
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total_value_locked:
+                  type: number
+                  description: total Invest Amount
+      '500':
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

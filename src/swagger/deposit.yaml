@@ -1,0 +1,65 @@
+/api/deposit:
+  post:
+    summary: Deposit Funds to a Bot
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: The ID of the user making the deposit
+              bot_id:
+                type: string
+                description: The ID of the bot receiving the deposit
+              amount:
+                type: number
+                description: The amount to deposit (must be at least 10)
+            required:
+              - user_id
+              - bot_id
+              - amount
+    responses:
+      '200':
+        description: Deposit successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                balance:
+                  type: number
+                  description: User's updated stake amount
+      '400':
+        description: Bad Request (e.g., amount is less than 10)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  description: Error message
+      '404':
+        description: Bot or Balance not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  description: Error message
+      '500':
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

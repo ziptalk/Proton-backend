@@ -1,0 +1,48 @@
+/api/remove:
+  post:
+    summary: Remove Stakes for a specific User and Bot
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: The ID of the user
+              bot_id:
+                type: string
+                description: The ID of the bot
+            required:
+              - user_id
+              - bot_id
+    responses:
+      '200':
+        description: Successfully removed stakes
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                balance:
+                  type: number
+                  description: Updated user stake amount
+      '404':
+        description: User or Bot not found, or no stakes found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: 'User not found'
+      '500':
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

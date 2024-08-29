@@ -1,0 +1,65 @@
+/api/dashboard:
+  get:
+    summary: Get User Dashboard Information
+    parameters:
+      - name: user_id
+        in: query
+        required: true
+        description: The ID of the user
+        schema:
+          type: string
+      - name: token
+        in: query
+        required: false
+        description: Optional token to filter bots by chain
+        schema:
+          type: string
+    responses:
+      '200':
+        description: User dashboard information retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total_balance:
+                  type: number
+                  description: Total balance of the user
+                total_profit:
+                  type: number
+                  description: Total profit of the user
+                total_balance_usdt:
+                  type: number
+                  description: Total balance in USDT
+                total_profit_usdt:
+                  type: number
+                  description: Total profit in USDT
+                bots:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      bot_id:
+                        type: string
+                        description: The ID of the bot
+                      bot_name:
+                        type: string
+                        description: The name of the bot
+                      total_investment:
+                        type: number
+                        description: Total investment in the bot
+                      current_value:
+                        type: number
+                        description: Current value of the investment
+                      daily_pnl:
+                        type: number
+                        description: Daily profit and loss ratio
+                      total_profit:
+                        type: number
+                        description: Total profit from the bot
+      '400':
+        $ref: "./openapi.yaml#/components/responses/BadRequest"
+      '404':
+        $ref: "./openapi.yaml#/components/responses/NotFoundError"
+      '500':
+        $ref: "./openapi.yaml#/components/responses/InternalServerError"

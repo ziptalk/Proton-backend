@@ -1,0 +1,389 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Proton API docs
+  description: Proton의 API 문서입니다
+servers:
+  - description: Project Production Server
+    url: 'https://app.qve.app'
+  - description: Project Local Server
+    url: 'http://localhost:3000/'
+paths:
+  /api/dashboard:
+    get:
+      summary: Get User Dashboard Information
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: false
+          description: Optional token to filter bots by chain
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User dashboard information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_balance:
+                    type: number
+                    description: Total balance of the user
+                  total_profit:
+                    type: number
+                    description: Total profit of the user
+                  total_balance_usdt:
+                    type: number
+                    description: Total balance in USDT
+                  total_profit_usdt:
+                    type: number
+                    description: Total profit in USDT
+                  bots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bot_id:
+                          type: string
+                          description: The ID of the bot
+                        bot_name:
+                          type: string
+                          description: The name of the bot
+                        total_investment:
+                          type: number
+                          description: Total investment in the bot
+                        current_value:
+                          type: number
+                          description: Current value of the investment
+                        daily_pnl:
+                          type: number
+                          description: Daily profit and loss ratio
+                        total_profit:
+                          type: number
+                          description: Total profit from the bot
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/deposit:
+    post:
+      summary: Deposit Funds to a Bot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: The ID of the user making the deposit
+                bot_id:
+                  type: string
+                  description: The ID of the bot receiving the deposit
+                amount:
+                  type: number
+                  description: The amount to deposit (must be at least 10)
+              required:
+                - user_id
+                - bot_id
+                - amount
+      responses:
+        '200':
+          description: Deposit successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  balance:
+                    type: number
+                    description: User's updated stake amount
+        '400':
+          description: 'Bad Request (e.g., amount is less than 10)'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    description: Error message
+        '404':
+          description: Bot or Balance not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    description: Error message
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/onboarding:
+    get:
+      summary: Get Total Invest Amount
+      responses:
+        '200':
+          description: Successfully get total invest amount
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_value_locked:
+                    type: number
+                    description: total Invest Amount
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/PnLChart:
+    get:
+      summary: API to retrieve the profit and loss chart for a specific bot.
+      parameters:
+        - name: bot_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID of the bot
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID of the user
+        - name: timeframe
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 'The timeframe to retrieve (e.g., number of days)'
+      responses:
+        '200':
+          description: Successfully retrieved profit and loss chart data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bot_id:
+                    type: string
+                    description: The ID of the bot
+                  bot_name:
+                    type: string
+                    description: The name of the bot
+                  timeframe:
+                    type: integer
+                    description: The timeframe retrieved
+                  daily_PnL:
+                    type: number
+                    description: Daily profit and loss rate
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        createdAt:
+                          type: string
+                          format: date-time
+                          description: Timestamp of the data entry
+                        pnlRate:
+                          type: number
+                          description: Profit and loss rate
+                  detailInformation:
+                    type: object
+                    properties:
+                      apy:
+                        type: number
+                        description: Annual percentage yield
+                      winRate:
+                        type: number
+                        description: Win rate
+                      mdd:
+                        type: number
+                        description: Maximum drawdown
+        '400':
+          description: Bad request (missing required parameters)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'bot_id, user_id, and timeframe are required'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/remove:
+    post:
+      summary: Remove Stakes for a specific User and Bot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: The ID of the user
+                bot_id:
+                  type: string
+                  description: The ID of the bot
+              required:
+                - user_id
+                - bot_id
+      responses:
+        '200':
+          description: Successfully removed stakes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  balance:
+                    type: number
+                    description: Updated user stake amount
+        '404':
+          description: 'User or Bot not found, or no stakes found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/trade-bots:
+    get:
+      summary: API to retrieve trade bots with calculated data.
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          description: Field to sort by
+          schema:
+            type: string
+            enum:
+              - bot_id
+              - name
+              - subscriber
+              - total_profits
+              - apy
+              - runtime
+              - tvl
+              - chain
+            default: total_profits
+        - name: order
+          in: query
+          required: false
+          description: Sorting order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+        - name: search
+          in: query
+          required: false
+          description: Search term for bot name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved trade bots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bot_id:
+                      type: string
+                      description: The ID of the bot
+                    name:
+                      type: string
+                      description: The name of the bot
+                    subscriber:
+                      type: integer
+                      description: Number of subscribers
+                    total_profits:
+                      type: number
+                      description: Total profits percentage
+                    apy:
+                      type: number
+                      description: Annual Percentage Yield
+                    runtime:
+                      type: integer
+                      description: Runtime in days
+                    tvl:
+                      type: number
+                      description: Total Value Locked
+                    chain:
+                      type: string
+                      description: Blockchain associated with the bot
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    BadRequest:
+      description: Invalid request or missing fields
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Invalid request or Missing fields
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Error saving stakeInfo
+    NotFoundError:
+      description: When Cannot found required File
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Not found Stake Info

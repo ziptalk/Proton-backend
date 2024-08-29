@@ -5,7 +5,11 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/server.js"
+    "prebuild": "npm run api-docs",
+    "start": "tsc && node dist/server.js",
+    "postbuild": "cp ./src/swagger.yaml ./dist/swagger.yaml",
+    "api-docs": "swagger-cli bundle ./src/swagger/openapi.yaml --outfile src/swagger.yaml --type yaml",
+    "predev": "npm run api-docs"
   },
   "keywords": [],
   "author": "",
@@ -22,13 +26,18 @@
     "express": "^4.19.2",
     "https": "^1.0.0",
     "mongoose": "^5.13.22",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "swagger-cli": "^4.0.4",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^22.2.0",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/yamljs": "^0.2.34",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }

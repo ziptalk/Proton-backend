@@ -8,6 +8,10 @@ import PnlChart from "./api/pnlChart";
 import deposit from "./api/deposit";
 import dashboard from "./api/dashboard";
 import remove from "./api/remove";
+import path from 'path';
+
+import swaggerUi from "swagger-ui-express";
+import YAML from 'yamljs';
 
 dotenv.config();
 
@@ -27,6 +31,10 @@ mongoose.disconnect().then(() => {
     }).then(() => console.log('Database connected'))
         .catch((error) => console.error('Database connection error:', error));
 }).catch((error) => console.error('Error disconnecting existing connection:', error));
+
+//Swagger 설정
+const swaggerSpec: any = YAML.load(path.join(__dirname, './swagger.yaml'));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(onboarding);
 app.use(tradeBots);

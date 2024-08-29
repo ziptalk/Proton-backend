@@ -9,7 +9,18 @@ servers:
   - description: "Project Local Server"
     url: http://localhost:3000/
 paths:
-
+  /api/dashboard:
+    $ref: './dashboard.yaml#/~1api~1dashboard'
+  /api/deposit:
+    $ref: './deposit.yaml#/~1api~1deposit'
+  /api/onboarding:
+    $ref: './onboarding.yaml#/~1api~1onboarding'
+  /api/PnLChart:
+    $ref: './pnlChart.yaml#/~1api~1PnLChart'
+  /api/remove:
+    $ref: './remove.yaml#/~1api~1remove'
+  /api/trade-bots:
+    $ref: './tradeBots.yaml#/~1api~1trade-bots'
 components:
   responses:
     BadRequest:

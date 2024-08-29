@@ -5,7 +5,7 @@ info:
   description: Proton의 API 문서입니다
 servers:
   - description: "Project Production Server"
-    url: 'https://app.qve.app'
+    url: 'https://api.qve.app'
   - description: "Project Local Server"
     url: http://localhost:3000/
 paths:

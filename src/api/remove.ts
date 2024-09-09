@@ -39,7 +39,7 @@ router.post('/api/remove', async (req, res) => {
 
         const totalAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
         await subtractUserStakeAmount(user, totalAmount);
-        await subtractBotBalance(bot_id, totalAmount);
+        // await subtractBotBalance(bot_id, totalAmount);
         await sendTokens("neutron1exd2u2rqse7tp3teq5kv0d7nuu8acyr0527fqx", user_id, totalAmount);
         await updateBotInfo(bot, totalAmount);
 
@@ -57,13 +57,13 @@ const subtractUserStakeAmount = async (user: iUser, amount: number) => {
 }
 
 const subtractBotBalance = async (bot_id: string, amount: number) => {
-    const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
-    if (!balance) {
-        throw new Error('Balance not found');
-    }
+    // const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
+    // if (!balance) {
+    //     throw new Error('Balance not found');
+    // }
 
-    balance.balance = Math.max(0, balance.balance - amount);
-    await balance.save();
+    // balance.balance = Math.max(0, balance.balance - amount);
+    // await balance.save();
 }
 
 const updateBotInfo = async (bot: iBot, amount: number) => {

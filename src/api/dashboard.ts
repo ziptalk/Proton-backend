@@ -3,6 +3,7 @@ import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { Balance, iBalance } from '../models/balanceModel';
 import {getDailyProfit, getTotalStakedAmount} from "../services/botService";
+import { getBalance } from '../services/stargateClient';
 
 const router = express.Router();
 
@@ -34,11 +35,21 @@ router.get('/api/dashboard', async (req, res) => {
 
         for (let botId of botIds) {
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
-            const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+            
+            if (!bot) {
+                return res.status(404).json({ success: false, message: 'Bot not found' });
+            }
+
+            // const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+            const latestBalance = await getBalance(bot.address);
+            if (latestBalance === undefined) {
+                throw new Error(`Failed to get balance for address ${bot.address}`);
+            }
+
             const totalStakedAmount = await getTotalStakedAmount(user_id, botId);
 
             if (bot && latestBalance && totalStakedAmount) {
-                const totalProfitPerBot = (latestBalance.balance - bot.investAmount) / totalStakedAmount;
+                const totalProfitPerBot = (Number(latestBalance) - bot.investAmount) / totalStakedAmount;
                 const dailyProfit: number = await getDailyProfit(botId);
 
                 totalProfit += totalProfitPerBot
@@ -47,6 +58,7 @@ router.get('/api/dashboard', async (req, res) => {
                 if (!token || (token && bot.chain === token)) {
                     botDataMap.set(botId, {
                         bot_id: bot.bot_id,
+                        bot_address: bot.address,
                         bot_name: bot.name,
                         total_investment: totalStakedAmount,
                         current_value: totalStakedAmount + totalProfitPerBot,

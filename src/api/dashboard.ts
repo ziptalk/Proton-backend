@@ -1,7 +1,7 @@
 import express from 'express';
 import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
-import {getDailyProfit, getTotalStakedAmount} from "../services/botService";
+import { getProfitPerBot, getTotalStakedAmount } from "../services/botService";
 import { getBalance } from '../services/balanceService';
 
 const router = express.Router();
@@ -34,23 +34,18 @@ router.get('/api/dashboard', async (req, res) => {
 
         for (let botId of botIds) {
             const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
-            
             if (!bot) {
                 return res.status(404).json({ success: false, message: 'Bot not found' });
             }
 
             const latestBalance = await getBalance(bot.address);
-            if (latestBalance === undefined) {
-                throw new Error(`Failed to get balance for address ${bot.address}`);
-            }
-
-            const totalStakedAmount = await getTotalStakedAmount(user_id, botId);
-
+            const totalStakedAmount = await getTotalStakedAmount(botId, user_id);
+            console.log(totalStakedAmount, latestBalance)
             if (bot && latestBalance && totalStakedAmount) {
-                const totalProfitPerBot = (Number(latestBalance) - bot.investAmount) / totalStakedAmount;
-                const dailyProfit: number = await getDailyProfit(botId);
-
-                totalProfit += totalProfitPerBot
+                const totalProfitPerBot = await getProfitPerBot(botId, user_id);
+                const dailyProfitPerBot = await getProfitPerBot(botId, undefined, true);
+            
+                totalProfit += totalProfitPerBot * totalStakedAmount
                 totalBalance += totalStakedAmount
 
                 if (!token || (token && bot.chain === token)) {
@@ -59,9 +54,9 @@ router.get('/api/dashboard', async (req, res) => {
                         bot_address: bot.address,
                         bot_name: bot.name,
                         total_investment: totalStakedAmount,
-                        current_value: totalStakedAmount + totalProfitPerBot,
-                        daily_pnl: dailyProfit / totalStakedAmount,
-                        total_profit: totalProfitPerBot
+                        current_value: totalStakedAmount * (1 + totalProfitPerBot),
+                        daily_pnl: dailyProfitPerBot * totalStakedAmount,
+                        total_profit: totalProfitPerBot * totalStakedAmount
                     });
                 }
             }

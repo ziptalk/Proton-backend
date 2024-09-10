@@ -37,7 +37,7 @@ router.get('/api/trade-bots', async (req, res) => {
                     bot_id: bot.bot_id,
                     name: bot.name,
                     subscriber: bot.subscriber,
-                    total_profits: (totalProfits * 100).toFixed(2),
+                    total_profits: totalProfits.toFixed(2),
                     apy: APY,
                     runtime: runtime,
                     tvl: bot.investAmount,

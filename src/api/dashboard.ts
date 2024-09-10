@@ -10,7 +10,7 @@ interface QueryParams {
     user_id?: string;
     token?: string;
 }
-const NTRNUSDT = 0.39
+const NTRNUSDT = 0.35
 
 // GET /api/dashboard
 router.get('/api/dashboard', async (req, res) => {

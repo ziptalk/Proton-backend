@@ -1,6 +1,8 @@
 import express from 'express';
 import { iBot, Bot } from '../models/botModel';
 import { iBalance, Balance } from '../models/balanceModel';
+import { getBalance } from '../services/balanceService';
+import {getProfitPerBot} from "../services/botService";
 
 const router = express.Router();
 
@@ -23,19 +25,19 @@ router.get('/api/trade-bots', async (req, res) => {
 
         const botsWithCalculatedData = await Promise.all(
             bots.map(async (bot) => {
-                const pnlData: iBalance[] = await Balance.find({ bot_id: bot.bot_id }).sort({ timestamp: -1 }).exec();
+                const firstBalance: iBalance | null = await Balance.findOne({ bot_id: bot.bot_id }).exec();
+                if (!firstBalance) {
+                    throw new Error(`No balance data found for bot ${bot.bot_id}`);
+                }
 
-                const recentData = pnlData[0];
-                const oldestData = pnlData[pnlData.length - 1];
-
-                const totalProfits = parseFloat((recentData.balance / oldestData.balance - 1).toFixed(2));
+                const totalProfits = await getProfitPerBot(bot.bot_id);
                 const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
 
                 return {
                     bot_id: bot.bot_id,
                     name: bot.name,
                     subscriber: bot.subscriber,
-                    total_profits: totalProfits * 100,
+                    total_profits: (totalProfits * 100).toFixed(2),
                     apy: APY,
                     runtime: runtime,
                     tvl: bot.investAmount,

@@ -1,7 +1,7 @@
 import express from 'express';
 import { Balance, iBalance } from '../models/balanceModel';
 import { Bot, iBot } from "../models/botModel";
-import { calculateBotDailyPnlRate } from "../services/botService";
+import { getProfitPerBot } from "../services/botService";
 
 const router = express.Router();
 
@@ -43,13 +43,13 @@ router.get('/api/PnLChart', async (req, res) => {
             mdd: 11
         };
 
-        const dailyPNL: number = await calculateBotDailyPnlRate(bot.bot_id);
+        const dailyPNL: number = await getProfitPerBot(bot.bot_id, user_id, true);
 
         const response = {
             bot_id: bot.bot_id,
             bot_name: bot.name,
             timeframe: parseInt(timeframe as string, 10),
-            daily_PnL: dailyPNL,
+            daily_PnL: (dailyPNL * 100).toFixed(2),
             data: balanceData.map(entry => ({
                 createdAt: entry.timestamp,
                 pnlRate: entry.balance

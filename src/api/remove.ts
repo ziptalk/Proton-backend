@@ -2,8 +2,7 @@ import express from 'express';
 import {iUser, User} from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
-import { sendTokens } from "../services/stargateClient";
-import { Balance, iBalance } from "../models/balanceModel";
+import { sendTokens } from "../services/balanceService";
 import { validateUnstakableDate } from "../services/stakingService";
 
 const router = express.Router();
@@ -54,16 +53,6 @@ router.post('/api/remove', async (req, res) => {
 const subtractUserStakeAmount = async (user: iUser, amount: number) => {
     user.stakeAmount = Math.max(0, user.stakeAmount - amount);
     await user.save();
-}
-
-const subtractBotBalance = async (bot_id: string, amount: number) => {
-    // const balance: iBalance | null = await Balance.findOne({ bot_id: bot_id }).sort({ timestamp: -1 }).exec();
-    // if (!balance) {
-    //     throw new Error('Balance not found');
-    // }
-
-    // balance.balance = Math.max(0, balance.balance - amount);
-    // await balance.save();
 }
 
 const updateBotInfo = async (bot: iBot, amount: number) => {

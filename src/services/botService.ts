@@ -1,7 +1,7 @@
 import { Bot, iBot } from "../models/botModel";
 import { Balance } from "../models/balanceModel";
 import {iStakeInfo, StakeInfo} from "../models/stakeInfoModel";
-import { getBalance } from "./stargateClient";
+import { getBalance } from "./balanceService";
 
 export const getTotalInvestAmount = async (): Promise<number> => {
     const totalInvestAmount = await Bot.aggregate([
@@ -32,8 +32,10 @@ export const calculateBotDailyPnlRate = async (botId: string): Promise<number> =
     return dailyPnlRate * 100;
 }
 
-export const getTotalStakedAmount = async (user_id: string, bot_id: string): Promise<number> => {
-    const stakeInfos: iStakeInfo[] = await StakeInfo.find({ user_id: user_id, bot_id: bot_id }).exec();
+export const getTotalStakedAmount = async (bot_id: string, user_id?: string): Promise<number> => {
+    let stakeInfos: iStakeInfo[] = [];
+    if(user_id) stakeInfos = await StakeInfo.find({ user_id: user_id, bot_id: bot_id }).exec();
+    else stakeInfos = await StakeInfo.find({ bot_id: bot_id }).exec();
     return stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
 }
 
@@ -42,7 +44,6 @@ export const getDailyProfit = async (botId: string): Promise<number> => {
     if (!bot) {
         throw new Error('Bot not found')
     }
-    // const todayBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
     const todayBalance = await getBalance(bot.address); 
     const yesterdayBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).skip(1).exec();
 

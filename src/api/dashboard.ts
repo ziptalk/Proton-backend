@@ -1,9 +1,8 @@
 import express from 'express';
 import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
-import { Balance, iBalance } from '../models/balanceModel';
 import {getDailyProfit, getTotalStakedAmount} from "../services/botService";
-import { getBalance } from '../services/stargateClient';
+import { getBalance } from '../services/balanceService';
 
 const router = express.Router();
 
@@ -40,7 +39,6 @@ router.get('/api/dashboard', async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Bot not found' });
             }
 
-            // const latestBalance: iBalance | null = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
             const latestBalance = await getBalance(bot.address);
             if (latestBalance === undefined) {
                 throw new Error(`Failed to get balance for address ${bot.address}`);

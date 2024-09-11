@@ -43,7 +43,7 @@ router.get('/api/PnLChart', async (req, res) => {
             mdd: 11
         };
 
-        const dailyPNL: number = await getProfitPerBot(bot.bot_id, user_id, true);
+        const dailyPNL: number = await getProfitPerBot(bot.bot_id, undefined, true);
 
         const response = {
             bot_id: bot.bot_id,

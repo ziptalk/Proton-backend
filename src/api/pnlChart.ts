@@ -52,6 +52,7 @@ router.get('/api/PnLChart', async (req, res) => {
             daily_PnL: dailyPNL.toFixed(2),
             data: balanceData.map(entry => ({
                 createdAt: entry.timestamp,
+                balance: entry.balanceRate
             })),
             detailInformation: botDetailInformation,
         };

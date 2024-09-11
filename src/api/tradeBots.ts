@@ -32,7 +32,7 @@ router.get('/api/trade-bots', async (req, res) => {
 
                 const totalProfits = await getProfitPerBot(bot.bot_id);
                 const runtime = Math.floor((Date.now() - bot.created_at.getTime()) / (1000 * 60 * 60 * 24));
-
+                console.log(totalProfits)
                 return {
                     bot_id: bot.bot_id,
                     name: bot.name,

@@ -101,7 +101,7 @@ async function calculatePnlRate(botId: string, startDate: Date, stakeInfos: iSta
     }
 
     console.log(`Total PNL Rate: ${totalPnlRate - 1}`);
-    return (totalPnlRate - 1) * 100;
+    return (totalPnlRate - 1);
 }
 
 export const getTotalStakedAmount = async (bot_id: string, user_id?: string): Promise<number> => {

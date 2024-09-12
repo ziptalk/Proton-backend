@@ -33,8 +33,8 @@ mongoose.disconnect().then(() => {
 }).catch((error) => console.error('Error disconnecting existing connection:', error));
 
 //Swagger 설정
-const swaggerSpec: any = YAML.load(path.join(__dirname, './swagger.yaml'));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// const swaggerSpec: any = YAML.load(path.join(__dirname, './swagger.yaml'));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(onboarding);
 app.use(tradeBots);

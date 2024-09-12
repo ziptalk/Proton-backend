@@ -1,7 +1,6 @@
 import { Bot, iBot } from "../models/botModel";
 import {Balance, iBalance} from "../models/balanceModel";
 import {iStakeInfo, StakeInfo} from "../models/stakeInfoModel";
-import { getBalance } from "./balanceService";
 
 export const getTotalInvestAmount = async (): Promise<number> => {
     const totalInvestAmount = await Bot.aggregate([
@@ -15,18 +14,20 @@ export const getTotalInvestAmount = async (): Promise<number> => {
     return totalInvestAmount[0]?.total_invest_amount || 0;
 }
 
-export const getProfitPerBot = async (botId: string, userId?: string, isDaily?: boolean): Promise<number> => {
+export const getProfitPerBot = async (botId: string, userId?: string, isDaily?: boolean, endDate?: Date): Promise<number> => {
     const bot: iBot | null = await Bot.findOne({ bot_id: botId }).exec();
     if (!bot) {
         throw new Error('Bot not found');
     }
 
     let startDate: Date;
+    const actualEndDate = endDate || new Date();
+
     if (isDaily) {
         if (userId) {
             throw new Error('Daily profit is not supported for individual users');
         }
-        startDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        startDate = new Date(actualEndDate.getTime() - 24 * 60 * 60 * 1000);
     } else {
         if (userId) {
             const firstStake = await StakeInfo.findOne({ bot_id: botId, user_id: userId }).sort({ timestamp: 1 }).exec();
@@ -37,28 +38,33 @@ export const getProfitPerBot = async (botId: string, userId?: string, isDaily?: 
         }
     }
 
-    const stakeInfoQuery: any = { bot_id: botId, timestamp: { $gte: startDate } };
+    const stakeInfoQuery: any = { 
+        bot_id: botId, 
+        timestamp: { $gte: startDate, $lte: actualEndDate } 
+    };
     if (userId) {
         stakeInfoQuery.user_id = userId;
     }
 
     const stakeInfos = await StakeInfo.find(stakeInfoQuery).sort({ timestamp: 1 }).exec();
 
-    return calculatePnlRate(botId, startDate, stakeInfos, userId);
+    return calculatePnlRate(botId, startDate, actualEndDate, stakeInfos, userId);
 };
 
-async function calculatePnlRate(botId: string, startDate: Date, stakeInfos: iStakeInfo[], userId?: string): Promise<number> {
+async function calculatePnlRate(botId: string, startDate: Date, endDate: Date, stakeInfos: iStakeInfo[], userId?: string): Promise<number> {
     const firstBalance = await Balance.findOne({ 
         bot_id: botId,
-        timestamp: { $gte: startDate }
+        timestamp: { $gte: startDate, $lte: endDate }
     }).sort({ timestamp: 1 }).exec();
 
-    const lastBalance = await Balance.findOne({ bot_id: botId }).sort({ timestamp: -1 }).exec();
+    const lastBalance = await Balance.findOne({ 
+        bot_id: botId,
+        timestamp: { $lte: endDate }
+    }).sort({ timestamp: -1 }).exec();
 
     if (!firstBalance || !lastBalance || firstBalance.balanceRate === 0) {
         return 0;
     }
-
     let totalPnlRate = 1;
     let prevBalance = firstBalance;
 

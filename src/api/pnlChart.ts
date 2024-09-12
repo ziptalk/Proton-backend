@@ -1,5 +1,4 @@
 import express from 'express';
-import { Balance, iBalance } from '../models/balanceModel';
 import { Bot, iBot } from "../models/botModel";
 import { getProfitPerBot } from "../services/botService";
 
@@ -7,7 +6,6 @@ const router = express.Router();
 
 interface QueryParams {
     bot_id?: string;
-    user_id?: string;
     timeframe?: string;
 }
 
@@ -18,11 +16,10 @@ interface BotDetailInformation {
 }
 
 router.get('/api/PnLChart', async (req, res) => {
-    const { bot_id, user_id, timeframe }: QueryParams = req.query;
-    // TODO: remove unnecessary query param(user_id)
+    const { bot_id, timeframe }: QueryParams = req.query;
 
-    if (!bot_id || !user_id || !timeframe) {
-        return res.status(400).json({ error: 'bot_id, user_id, and timeframe are required' });
+    if (!bot_id || !timeframe) {
+        return res.status(400).json({ error: 'bot_id and timeframe are required' });
     }
 
     try {
@@ -31,11 +28,7 @@ router.get('/api/PnLChart', async (req, res) => {
             return res.status(404).json({ error: 'Bot not found' });
         }
 
-        const balanceData: iBalance[] = await Balance.find({ bot_id })
-            .sort({ timestamp: -1 })
-            .limit(parseInt(timeframe as string, 10))
-            .exec();
-        balanceData.reverse();
+        const timeframeNumber = parseInt(timeframe as string, 10);
 
         const botDetailInformation: BotDetailInformation = {
             apy: 15.5,
@@ -45,15 +38,28 @@ router.get('/api/PnLChart', async (req, res) => {
 
         const dailyPNL: number = await getProfitPerBot(bot.bot_id, undefined, true);
 
+        const pnlData = await Promise.all(
+            Array.from({ length: timeframeNumber }, (_, index) => {
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() - index);
+                
+                return getProfitPerBot(bot.bot_id, undefined, false, endDate);
+            })
+        );
+
         const response = {
             bot_id: bot.bot_id,
             bot_name: bot.name,
-            timeframe: parseInt(timeframe as string, 10),
+            timeframe: timeframeNumber,
             daily_PnL: dailyPNL.toFixed(2),
-            data: balanceData.map(entry => ({
-                createdAt: entry.timestamp,
-                balance: entry.balanceRate
-            })),
+            data: pnlData.map((pnlRate, index) => {
+                const date = new Date();
+                date.setDate(date.getDate() - index);
+                return {
+                    createdAt: date,
+                    pnlRate: pnlRate
+                };
+            }).reverse(),
             detailInformation: botDetailInformation,
         };
 

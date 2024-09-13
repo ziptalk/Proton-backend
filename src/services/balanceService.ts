@@ -82,3 +82,32 @@ export async function saveBotBalance(){
         console.error(`Failed to save balance:`, error);
     }
 }
+
+// import axios from 'axios';
+// import * as crypto from 'crypto';
+// export async function getBalance(): Promise<number> {
+//     const order_url = "https://api-glb.hashkey.com/api/v1/futures/balance";
+//     const timestamp = Date.now();
+//
+//     const params = {
+//         timestamp: timestamp.toString()
+//     };
+//
+//     const queryString = new URLSearchParams(params as any).toString();
+//
+//     const signature = crypto
+//         .createHmac('sha256', "NhZA4av3SWMCHM8Ufv6sDNsROZMVUsHtnrokFWI9BdiWGINttQEAAy48WffEHVsD")
+//         .update(queryString)
+//         .digest('hex');
+//
+//     const url = `${order_url}?${queryString}&signature=${signature}`;
+//
+//     const headers = {
+//         'X-HK-APIKEY': '2zHgZnUAFoI5OI2Zioj0L7wCVH7mdUl1ZP6wzcsfc6ZUEn8ZoFUXsetT1VCURToc',
+//         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+//     };
+//
+//     const balance_response = await axios.get(url, { headers });
+//     return balance_response.data[0].balance
+// }
+

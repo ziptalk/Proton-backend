@@ -4,8 +4,7 @@ export interface iTransaction extends Document {
     bot_id: string;
     transaction_id: string;
     timestamp: Date;
-    from: string;
-    to: string;
+    route: string;
     in: number;
     out: number;
 }
@@ -14,8 +13,7 @@ const TransactionSchema = new Schema<iTransaction>({
     bot_id: String,
     transaction_id: String,
     timestamp: Date,
-    from: String,
-    to: String,
+    route: String,
     in: Number,
     out: Number
 });

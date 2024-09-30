@@ -1,6 +1,6 @@
 import express from 'express';
 import { Bot, iBot } from "../models/botModel";
-import { getProfitPerBot } from "../services/botService";
+import {getPrice, getProfitPerBot} from "../services/botService";
 
 const router = express.Router();
 
@@ -13,6 +13,7 @@ interface BotDetailInformation {
     apy: number;
     winRate: number;
     mdd: number;
+    healthFactor: number;
 }
 
 router.get('/api/PnLChart', async (req, res) => {
@@ -33,7 +34,8 @@ router.get('/api/PnLChart', async (req, res) => {
         const botDetailInformation: BotDetailInformation = {
             apy: 15.5,
             winRate: 70,
-            mdd: 11
+            mdd: 11,
+            healthFactor: 1.25
         };
 
         const dailyPNL: number = await getProfitPerBot(bot.bot_id, undefined, true);
@@ -46,12 +48,13 @@ router.get('/api/PnLChart', async (req, res) => {
                 return getProfitPerBot(bot.bot_id, undefined, false, endDate);
             })
         );
-
+        const domesticRate = await getPrice("NTRNUSDT")
         const response = {
             bot_id: bot.bot_id,
             bot_name: bot.name,
             timeframe: timeframeNumber,
             daily_PnL: dailyPNL.toFixed(2),
+            domesticRate : (1 / domesticRate).toFixed(2),
             data: pnlData.map((pnlRate, index) => {
                 const date = new Date();
                 date.setDate(date.getDate() - index);

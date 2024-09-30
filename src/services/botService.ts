@@ -1,6 +1,7 @@
 import { Bot, iBot } from "../models/botModel";
 import {Balance, iBalance} from "../models/balanceModel";
 import {iStakeInfo, StakeInfo} from "../models/stakeInfoModel";
+import {BasicSymbolParam, USDMClient} from "binance"
 
 export const getTotalInvestAmount = async (): Promise<number> => {
     const totalInvestAmount = await Bot.aggregate([
@@ -115,4 +116,17 @@ export const getTotalStakedAmount = async (bot_id: string, user_id?: string): Pr
     if(user_id) stakeInfos = await StakeInfo.find({ user_id: user_id, bot_id: bot_id }).exec();
     else stakeInfos = await StakeInfo.find({ bot_id: bot_id }).exec();
     return stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
+}
+const client = new USDMClient({});
+export async function getPrice(symbol: string): Promise<any> {
+    try {
+        const data : BasicSymbolParam = {
+            symbol: symbol
+        }
+        const response = await client.getMarkPrice(data);
+        return response.markPrice
+    } catch (error) {
+        console.error('선물 가격을 가져오는 중 오류 발생:', error);
+        throw error;
+    }
 }

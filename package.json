@@ -19,6 +19,7 @@
     "@cosmjs/proto-signing": "^0.28.4",
     "@cosmjs/stargate": "^0.28.13",
     "@duality-labs/neutronjs": "^4.0.0-rc3-fix-2",
+    "binance": "^2.13.3",
     "chain-registry": "^1.63.40",
     "cors": "^2.8.5",
     "cosmjs-utils": "^0.1.0",

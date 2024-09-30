@@ -1,7 +1,7 @@
 import express from 'express';
 import { User } from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
-import { getProfitPerBot, getTotalStakedAmount } from "../services/botService";
+import {getPrice, getProfitPerBot, getTotalStakedAmount} from "../services/botService";
 import { getBalance } from '../services/balanceService';
 
 const router = express.Router();
@@ -10,8 +10,6 @@ interface QueryParams {
     user_id?: string;
     token?: string;
 }
-const NTRNUSDT = 0.35
-
 // GET /api/dashboard
 router.get('/api/dashboard', async (req, res) => {
     try {
@@ -63,12 +61,12 @@ router.get('/api/dashboard', async (req, res) => {
         }
 
         const botsData = Array.from(botDataMap.values());
+        const domesticRate = await getPrice("NTRNUSDT")
 
         const dashboardData = {
             total_balance: totalBalance,
             total_profit: totalProfit,
-            total_balance_usdt: totalBalance * NTRNUSDT,
-            total_profit_usdt: totalProfit * NTRNUSDT,
+            domesticRate : (1 / domesticRate).toFixed(2),
             bots: botsData
         };
         console.log(dashboardData)

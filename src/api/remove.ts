@@ -38,8 +38,6 @@ router.post('/api/remove', async (req, res) => {
 
         const totalAmount = stakeInfos.reduce((sum, stakeInfo) => sum + stakeInfo.amount, 0);
         await subtractUserStakeAmount(user, totalAmount);
-        // await subtractBotBalance(bot_id, totalAmount);
-        await sendTokens("neutron1exd2u2rqse7tp3teq5kv0d7nuu8acyr0527fqx", user_id, totalAmount);
         await updateBotInfo(bot, totalAmount);
 
         return res.json({ success: true, balance: user.stakeAmount });

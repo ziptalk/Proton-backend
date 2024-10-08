@@ -2,7 +2,6 @@ import express from 'express';
 import {iUser, User} from '../models/userModel';
 import { Bot, iBot } from '../models/botModel';
 import { iStakeInfo, StakeInfo } from '../models/stakeInfoModel';
-import { sendTokens } from "../services/balanceService";
 import { validateUnstakableDate } from "../services/stakingService";
 
 const router = express.Router();
@@ -44,7 +43,8 @@ router.post('/api/remove', async (req, res) => {
     } catch (error: any) {
         console.error('An error occurred:', error.message);
         console.error('Stack trace:', error.stack);
-        return res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+        const statusCode = error.status || 500;
+        return res.status(statusCode).json({ success: false, message: 'Server Error', error: error.message });
     }
 });
 
